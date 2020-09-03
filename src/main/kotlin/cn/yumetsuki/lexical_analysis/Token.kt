@@ -5,6 +5,8 @@ sealed class Token(
     val value: String
 )
 
+// 变量定义 -> var
+class VariableDefine(value: String) : Token("variable", value)
 // 标识符 -> 不以数字开头，无空格/问号/百分号等特殊符号
 class Identifier(value: String) : Token("identifier", value)
 // 赋值 -> =
