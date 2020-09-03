@@ -3,7 +3,9 @@ package cn.yumetsuki.lexical_analysis
 sealed class Token(
     val type: String,
     val value: String
-)
+) {
+    override fun toString(): String = "[$type]: $value"
+}
 
 // 变量定义 -> var
 class VariableDefine(value: String) : Token("variable", value)
