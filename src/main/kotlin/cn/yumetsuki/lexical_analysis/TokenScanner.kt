@@ -12,7 +12,7 @@ class DefaultTokenScanner : TokenScanner {
             var nextState = currentState.nextState(c)
             if (nextState == null) {
                 result.add(currentState.token)
-                nextState = if (c.isWhitespace() && c != NewLineTag) {
+                nextState = if (c == ' ') {
                     InitState()
                 } else {
                     InitState().nextState(c)?: error("Unsupported token")
@@ -112,7 +112,7 @@ private class NumberState(
     override fun nextState(char: Char): ScanState? {
         val nextText = "$text$char"
         return when {
-            char == NewLineTag -> null
+            char.isWhitespace() -> null
             (nextText.toIntOrNull() != null || nextText.toDoubleOrNull() != null) -> NumberState(nextText)
             else -> null
         }
