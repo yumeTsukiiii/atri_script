@@ -29,3 +29,19 @@ class Mod(value: String) : Token("mod", value)
 class LeftParentheses(value: String) : Token("left_parentheses", value)
 // 右括号 -> )
 class RightParentheses(value: String) : Token("right_parentheses", value)
+// 换行符 -> \n
+class NewLine(value: String) : Token("new_line", value)
+// 分号 -> ;
+class Semicolon(value: String) : Token("semicolon", value)
+
+const val VariableDefineTag = "var"
+const val AssignmentTag = '='
+const val PlusTag = '+'
+const val MinusTag = '-'
+const val MultiplicationTag = '*'
+const val DivisionTag = '/'
+const val ModTag = '%'
+const val LeftParenthesesTag = '('
+const val RightParenthesesTag =')'
+const val NewLineTag = '\n'
+const val SemicolonTag = ';'

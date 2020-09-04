@@ -12,9 +12,16 @@ class DefaultTokenScanner : TokenScanner {
             var nextState = currentState.nextState(c)
             if (nextState == null) {
                 result.add(currentState.token)
-                nextState = InitState()
+                nextState = if (c.isWhitespace() && c != NewLineTag) {
+                    InitState()
+                } else {
+                    InitState().nextState(c)?: error("Unsupported token")
+                }
             }
             currentState = nextState
+        }
+        if (currentState !is InitState) {
+            result.add(currentState.token)
         }
         return result
     }
@@ -37,14 +44,16 @@ private class InitState : ScanState {
     override fun nextState(char: Char): ScanState? = when {
         char.isJavaIdentifierStart() -> IdentifierState(char.toString())
         char.isDigit() -> NumberState(char.toString())
-        char == '=' -> AssignmentState(char.toString())
-        char == '+' -> PlusState(char.toString())
-        char == '-' -> MinusState(char.toString())
-        char == '*' -> MultiplicationState(char.toString())
-        char == '/' -> DivisionState(char.toString())
-        char == '%' -> ModState(char.toString())
-        char == '(' -> LeftParenthesesState(char.toString())
-        char == ')' -> RightParenthesesState(char.toString())
+        char == AssignmentTag -> AssignmentState(char.toString())
+        char == PlusTag -> PlusState(char.toString())
+        char == MinusTag -> MinusState(char.toString())
+        char == MultiplicationTag -> MultiplicationState(char.toString())
+        char == DivisionTag -> DivisionState(char.toString())
+        char == ModTag -> ModState(char.toString())
+        char == LeftParenthesesTag -> LeftParenthesesState(char.toString())
+        char == RightParenthesesTag -> RightParenthesesState(char.toString())
+        char == NewLineTag -> NewLineState(char.toString())
+        char == SemicolonTag -> SemicolonState(char.toString())
         else -> null
     }
 }
@@ -75,7 +84,7 @@ private class IdentifierState(
     override fun nextState(char: Char): ScanState? {
         val nextText = "$text$char"
         return when {
-            nextText == "var" -> VariableDefineState(nextText)
+            nextText == VariableDefineTag -> VariableDefineState(nextText)
             char.isDigit() || char.isJavaIdentifierPart() -> IdentifierState(nextText)
             else -> null
         }
@@ -103,7 +112,8 @@ private class NumberState(
     override fun nextState(char: Char): ScanState? {
         val nextText = "$text$char"
         return when {
-            nextText.toIntOrNull() != null || nextText.toDoubleOrNull() != null -> NumberState(nextText)
+            char == NewLineTag -> null
+            (nextText.toIntOrNull() != null || nextText.toDoubleOrNull() != null) -> NumberState(nextText)
             else -> null
         }
     }
@@ -182,6 +192,28 @@ private class RightParenthesesState(
 
     override val token: Token
         get() = RightParentheses(text)
+
+    override fun nextState(char: Char): ScanState? = null
+
+}
+
+private class NewLineState(
+    override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = NewLine(text)
+
+    override fun nextState(char: Char): ScanState? = null
+
+}
+
+private class SemicolonState(
+    override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = Semicolon(text)
 
     override fun nextState(char: Char): ScanState? = null
 
