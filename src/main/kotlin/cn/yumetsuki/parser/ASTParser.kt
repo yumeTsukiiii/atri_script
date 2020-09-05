@@ -22,7 +22,8 @@ class ASTParser {
         val result = arrayListOf<ASTNode<*>>()
         val tokenIterator = TokenIterator(tokens)
         while (tokenIterator.hasNext()) {
-            if (tokenIterator.next() is Semicolon) {
+            val nextToken = tokenIterator.next()
+            if (nextToken is Semicolon || nextToken is NewLine) {
                 continue
             } else {
                 tokenIterator.currentPos--
