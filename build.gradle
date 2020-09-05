@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.4.0'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
 
 group 'cn.yumetsuki'
@@ -20,4 +21,10 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+shadowJar {
+    baseName = 'atri_script'
+    classifier = null
+    version = null
 }

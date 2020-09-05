@@ -6,6 +6,8 @@ interface Memory {
 
     fun setVariable(name: String, value: Any?)
 
+    fun clearAll()
+
 }
 
 class GlobalMemory : Memory {
@@ -16,6 +18,10 @@ class GlobalMemory : Memory {
 
     override fun setVariable(name: String, value: Any?) {
         variables[name] = value
+    }
+
+    override fun clearAll() {
+        variables.clear()
     }
 
 }

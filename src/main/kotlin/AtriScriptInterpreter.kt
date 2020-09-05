@@ -4,14 +4,17 @@ import cn.yumetsuki.parser.*
 import cn.yumetsuki.semantic_analysis.ASTVisitor
 import cn.yumetsuki.semantic_analysis.DefaultASTVisitor
 import cn.yumetsuki.semantic_analysis.GlobalMemory
+import cn.yumetsuki.semantic_analysis.Memory
 
-class AtriScriptInterpreter {
+class AtriScriptInterpreter(
+    memory: Memory = GlobalMemory()
+) {
 
     private val tokenScanner: TokenScanner = DefaultTokenScanner()
 
     private val astParser: ASTParser = ASTParser()
 
-    private val astVisitor: ASTVisitor = DefaultASTVisitor(GlobalMemory())
+    private val astVisitor: ASTVisitor = DefaultASTVisitor(memory)
 
     fun eval(input: String) : String {
         val tokens = tokenScanner.scan(input)
