@@ -1,8 +1,4 @@
-import cn.yumetsuki.lexical_analysis.DefaultTokenScanner
-import cn.yumetsuki.lexical_analysis.TokenScanner
-import cn.yumetsuki.parser.*
-import cn.yumetsuki.semantic_analysis.DefaultASTVisitor
-import cn.yumetsuki.semantic_analysis.GlobalMemory
+import cn.yumetsuki.AtriScriptInterpreter
 import org.junit.Test
 
 class ScannerTest {

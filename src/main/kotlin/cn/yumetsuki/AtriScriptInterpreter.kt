@@ -1,3 +1,5 @@
+package cn.yumetsuki
+
 import cn.yumetsuki.lexical_analysis.DefaultTokenScanner
 import cn.yumetsuki.lexical_analysis.TokenScanner
 import cn.yumetsuki.parser.*
