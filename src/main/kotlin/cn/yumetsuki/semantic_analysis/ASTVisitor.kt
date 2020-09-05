@@ -49,12 +49,12 @@ class DefaultASTVisitor(
                 else -> error("Unsupported operator: ${node.value}")
             }
         } else {
-            error("Unsupported expression value type")
+            error("This operation \"${node.value}\" cannot be used for ${node.leftChild.value}($leftValue) and ${node.rightChild.value}($rightValue)")
         }
     }
 
     override fun visitVariable(node: VariableNode): Any {
-        return memory.getVariable(node.value)?: error("${node.value} is undefined")
+        return memory.getVariable(node.value)?:Undefined
     }
 
     override fun visitIdentifier(node: IdentifierNode): Any {
@@ -87,4 +87,8 @@ class DefaultASTVisitor(
         memory.setVariable(variableName, null)
         return variableName
     }
+}
+
+object Undefined {
+    override fun toString(): String = "undefined"
 }
