@@ -292,10 +292,25 @@ private class NotState(
     override val token: Token
         get() = Not(text)
 
-    override fun nextState(char: Char): ScanState? = when(val nextText = "${text}$char") {
-        NotEqualsTag -> NotEqualsState(nextText)
-        else -> null
+    override fun nextState(char: Char): ScanState? {
+        val nextText = "${text}$char"
+        return when {
+            nextText == NotEqualsTag -> NotEqualsState(nextText)
+            char.isJavaIdentifierPart() -> NotExprState(nextText)
+            else -> null
+        }
     }
+
+}
+
+private class NotExprState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = Not(text)
+
+    override fun nextState(char: Char): ScanState? = null
 
 }
 
