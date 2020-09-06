@@ -33,6 +33,10 @@ class RightParentheses(value: String) : Token("right_parentheses", value)
 class NewLine(value: String) : Token("new_line", value)
 // 分号 -> ;
 class Semicolon(value: String) : Token("semicolon", value)
+// true
+class True(value: String) : Token("true", value)
+// false
+class False(value: String) : Token("false", value)
 // 逻辑或 -> |
 class LogicOr(value: String) : Token("logic_or", value)
 // 逻辑与 -> &
@@ -67,6 +71,8 @@ const val LeftParenthesesTag = '('
 const val RightParenthesesTag =')'
 const val NewLineTag = '\n'
 const val SemicolonTag = ';'
+const val TrueTag = "true"
+const val FalseTag = "false"
 const val LogicOrTag = '|'
 const val LogicAndTag = '&'
 const val OrTag = "||"

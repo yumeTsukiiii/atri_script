@@ -93,6 +93,8 @@ private class IdentifierState(
     override fun nextState(char: Char): ScanState? {
         val nextText = "$text$char"
         return when {
+            nextText == TrueTag -> TrueState(nextText)
+            nextText == FalseTag -> FalseState(nextText)
             nextText == VariableDefineTag -> VariableDefineState(nextText)
             char.isDigit() || char.isJavaIdentifierPart() -> IdentifierState(nextText)
             else -> null
@@ -226,6 +228,28 @@ private class SemicolonState(
 
     override val token: Token
         get() = Semicolon(text)
+
+    override fun nextState(char: Char): ScanState? = null
+
+}
+
+private class TrueState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = True(text)
+
+    override fun nextState(char: Char): ScanState? = null
+
+}
+
+private class FalseState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = False(text)
 
     override fun nextState(char: Char): ScanState? = null
 
