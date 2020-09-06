@@ -127,7 +127,14 @@ class ASTParser {
                 break
             }
         }
-        return result
+        return result?.also {
+            if (tokenIterator.hasNext()) {
+                val nextToken = tokenIterator.next()
+                if (nextToken !is NewLine && nextToken !is Semicolon) {
+                    error("expression [${result.value}] must be ended with ';' or '\\n' or EmptyString")
+                }
+            }
+        }
     }
 
     private fun parseMultiOrDivOrModExpression(tokenIterator: TokenIterator): ExpressionNode<*>? {
