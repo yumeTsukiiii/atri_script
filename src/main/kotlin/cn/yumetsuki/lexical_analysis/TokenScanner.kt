@@ -54,6 +54,11 @@ private class InitState : ScanState {
         char == RightParenthesesTag -> RightParenthesesState(char.toString())
         char == NewLineTag -> NewLineState(char.toString())
         char == SemicolonTag -> SemicolonState(char.toString())
+        char == LogicOrTag -> LogicOrState(char.toString())
+        char == LogicAndTag -> LogicAndState(char.toString())
+        char == NotTag -> NotState(char.toString())
+        char == GreatThanTag -> GreatThanState(char.toString())
+        char == LessThanTag -> LessThanState(char.toString())
         else -> null
     }
 }
@@ -98,7 +103,10 @@ private class AssignmentState(
     override val token: Token
         get() = Assignment(text)
 
-    override fun nextState(char: Char): ScanState? = null
+    override fun nextState(char: Char): ScanState? = when(val nextText = "${text}$char") {
+        EqualsTag -> EqualsState(nextText)
+        else -> null
+    }
 
 }
 
@@ -214,6 +222,145 @@ private class SemicolonState(
 
     override val token: Token
         get() = Semicolon(text)
+
+    override fun nextState(char: Char): ScanState? = null
+
+}
+
+private class LogicOrState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = LogicOr(text)
+
+    override fun nextState(char: Char): ScanState? {
+        return when(val nextText = "${text}$char") {
+            OrTag -> OrState(nextText)
+            else -> null
+        }
+    }
+
+}
+
+private class LogicAndState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = LogicAnd(text)
+
+    override fun nextState(char: Char): ScanState? {
+        return when(val nextText = "${text}$char") {
+            AndTag -> AndState(nextText)
+            else -> null
+        }
+    }
+
+}
+
+private class OrState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = Or(text)
+
+    override fun nextState(char: Char): ScanState? = null
+
+}
+
+private class AndState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = And(text)
+
+    override fun nextState(char: Char): ScanState? = null
+
+}
+
+private class NotState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = Not(text)
+
+    override fun nextState(char: Char): ScanState? = when(val nextText = "${text}$char") {
+        NotEqualsTag -> NotEqualsState(nextText)
+        else -> null
+    }
+
+}
+
+private class EqualsState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = Equals(text)
+
+    override fun nextState(char: Char): ScanState? = null
+
+}
+
+private class NotEqualsState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = NotEquals(text)
+
+    override fun nextState(char: Char): ScanState? = null
+
+}
+
+private class GreatThanState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = GreatThan(text)
+
+    override fun nextState(char: Char): ScanState? = when(val nextText = "${text}$char") {
+        GreatEqualsTag -> GreatEqualsState(nextText)
+        else -> null
+    }
+}
+
+private class GreatEqualsState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = GreatEquals(text)
+
+    override fun nextState(char: Char): ScanState? = null
+
+}
+
+private class LessThanState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = LessThan(text)
+
+    override fun nextState(char: Char): ScanState? = when(val nextText = "${text}$char") {
+        LessEqualsTag -> LessEqualsState(nextText)
+        else -> null
+    }
+
+}
+
+private class LessEqualsState(
+        override val text: String
+) : ScanState {
+
+    override val token: Token
+        get() = LessEquals(text)
 
     override fun nextState(char: Char): ScanState? = null
 
