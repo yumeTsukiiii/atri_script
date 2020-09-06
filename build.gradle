@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.4.0'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'maven-publish'
 }
 
 group 'cn.yumetsuki'
@@ -27,4 +28,21 @@ shadowJar {
     baseName = 'atri_script'
     classifier = null
     version = null
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'cn.yumetsuki'
+            artifactId = 'atri_script'
+            version = '1.0.0'
+
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url 'build/repo'
+        }
+    }
 }
