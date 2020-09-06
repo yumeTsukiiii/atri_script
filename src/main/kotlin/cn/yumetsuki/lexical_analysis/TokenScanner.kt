@@ -8,10 +8,13 @@ class DefaultTokenScanner : TokenScanner {
     override fun scan(input: String): List<Token> {
         val result = arrayListOf<Token>()
         var currentState: ScanState = InitState()
-        input.forEach { c: Char ->
+        var i = 0
+        while (i < input.length) {
+            val c = input[i]
             var nextState = currentState.nextState(c)
             if (nextState == null) {
                 result.add(currentState.token)
+                while (c == ' ' && i < input.length && input[i + 1] == ' ') i++
                 nextState = if (c == ' ') {
                     InitState()
                 } else {
@@ -19,6 +22,7 @@ class DefaultTokenScanner : TokenScanner {
                 }
             }
             currentState = nextState
+            i++
         }
         if (currentState !is InitState) {
             result.add(currentState.token)
