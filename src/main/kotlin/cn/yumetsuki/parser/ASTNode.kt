@@ -19,12 +19,19 @@ sealed class ExpressionNode<T>(
     value: T
 ) : ASTNode<T>(value)
 
-class OperatorNode(
-    value: Char,
+class BinaryOperatorNode(
+    value: String,
     val leftChild: ExpressionNode<*>,
     val rightChild: ExpressionNode<*>
-) : ExpressionNode<Char>(value) {
+) : ExpressionNode<String>(value) {
     override fun children(): List<ASTNode<*>> = listOf(leftChild, rightChild)
+}
+
+class UnaryOperatorNode(
+    value: String,
+    val child: ExpressionNode<*>
+) : ExpressionNode<String>(value) {
+    override fun children(): List<ASTNode<*>> = listOf(child)
 }
 
 class VariableNode(
@@ -42,6 +49,12 @@ class IdentifierNode(
 class NumberNode(
     value: Number
 ) : ExpressionNode<Number>(value) {
+    override fun children(): List<ASTNode<*>> = listOf()
+}
+
+class BoolNode(
+    value: Boolean
+) : ExpressionNode<Boolean>(value) {
     override fun children(): List<ASTNode<*>> = listOf()
 }
 

@@ -6,13 +6,15 @@ import cn.yumetsuki.parser.*
 interface ASTVisitor {
     fun visitAssignment(node: AssignmentNode) : Any
     fun visitExpression(node: ExpressionNode<*>) : Any
-    fun visitOperator(node: OperatorNode) : Any
+    fun visitBinaryOperator(node: BinaryOperatorNode) : Any
+    fun visitUnaryOperator(node: UnaryOperatorNode) : Any
     fun visitVariable(node: VariableNode) : Any
     fun visitIdentifier(node: IdentifierNode) : Any
     fun visitNumber(node: NumberNode) : Number
     fun visitVariableDefineAndAssignment(node: VariableDefineAndAssignmentNode) : Pair<String, Any>
     fun visitVariableAssignment(node: VariableAssignmentNode) : Pair<String, Any>
     fun visitVariableDefine(node: VariableDefineNode) : String
+    fun visitBool(node: BoolNode) : Boolean
 }
 
 class DefaultASTVisitor(
@@ -24,32 +26,54 @@ class DefaultASTVisitor(
 
     override fun visitExpression(node: ExpressionNode<*>): Any {
         return when(node) {
-            is OperatorNode -> {
-                visitOperator(node)
-            }
-            is VariableNode -> {
-                visitVariable(node)
-            }
-            is NumberNode -> {
-                visitNumber(node)
-            }
+            is BinaryOperatorNode -> visitBinaryOperator(node)
+            is UnaryOperatorNode -> visitUnaryOperator(node)
+            is VariableNode -> visitVariable(node)
+            is NumberNode -> visitNumber(node)
+            is BoolNode -> visitBool(node)
         }
     }
 
-    override fun visitOperator(node: OperatorNode): Any {
+    override fun visitBinaryOperator(node: BinaryOperatorNode): Any {
         val leftValue = visitExpression(node.leftChild)
         val rightValue = visitExpression(node.rightChild)
+        if (node.value == EqualsTag) return leftValue == rightValue
         if (leftValue is Number && rightValue is Number) {
             return when(node.value) {
-                PlusTag -> leftValue.toDouble() + rightValue.toDouble()
-                MinusTag -> leftValue.toDouble() - rightValue.toDouble()
-                MultiplicationTag -> leftValue.toDouble() * rightValue.toDouble()
-                DivisionTag -> leftValue.toDouble() / rightValue.toDouble()
-                ModTag -> leftValue.toDouble() % rightValue.toDouble()
-                else -> error("Unsupported operator: ${node.value}")
+                PlusTag.toString() -> leftValue.toDouble() + rightValue.toDouble()
+                MinusTag.toString() -> leftValue.toDouble() - rightValue.toDouble()
+                MultiplicationTag.toString() -> leftValue.toDouble() * rightValue.toDouble()
+                DivisionTag.toString() -> leftValue.toDouble() / rightValue.toDouble()
+                ModTag.toString() -> leftValue.toDouble() % rightValue.toDouble()
+                GreatEqualsTag -> leftValue.toDouble() >= rightValue.toDouble()
+                GreatThanTag.toString() -> leftValue.toDouble() > rightValue.toDouble()
+                LessEqualsTag -> leftValue.toDouble() <= rightValue.toDouble()
+                LessThanTag.toString() -> leftValue.toDouble() < rightValue.toDouble()
+                else -> error("Unsupported operator: ${node.value} between Number($leftValue) and Number($rightValue)")
             }
-        } else {
-            error("This operation \"${node.value}\" cannot be used for ${node.leftChild.value}($leftValue) and ${node.rightChild.value}($rightValue)")
+        }
+        if (leftValue is Boolean && rightValue is Boolean) {
+            return when(node.value) {
+                AndTag -> leftValue && rightValue
+                OrTag -> leftValue && rightValue
+                else -> error("Unsupported operator: ${node.value} between Boolean($leftValue) and Boolean($rightValue)")
+            }
+        }
+        error("This operation \"${node.value}\" cannot be used for ${node.leftChild.value}($leftValue) and ${node.rightChild.value}($rightValue)")
+    }
+
+    override fun visitUnaryOperator(node: UnaryOperatorNode): Any {
+        return when(node.value) {
+            NotTag.toString() -> visitExpression(node.child).let {
+                !when(it) {
+                    is Boolean -> it
+                    is Number -> it == 0
+                    is String -> it.isNotEmpty()
+                    is Char -> !it.isWhitespace()
+                    else -> false
+                }
+            }
+            else -> error("Unsupported operator: ${node.value}")
         }
     }
 
@@ -87,6 +111,8 @@ class DefaultASTVisitor(
         memory.setVariable(variableName, null)
         return variableName
     }
+
+    override fun visitBool(node: BoolNode): Boolean = node.value
 }
 
 object Undefined {
