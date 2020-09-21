@@ -38,6 +38,7 @@ class AtriScriptInterpreter(
                 }
             }.lastOrNull()?:"工口発生: Unknown error"
         } catch (e: Exception) {
+            e.printStackTrace()
             "工口発生: ${e.message}"
         }
     }

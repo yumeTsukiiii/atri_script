@@ -1,6 +1,7 @@
 package cn.yumetsuki.parser
 
 import cn.yumetsuki.lexical_analysis.*
+import kotlin.math.log
 import cn.yumetsuki.lexical_analysis.Number as NumberToken
 
 class TokenIterator(
@@ -94,22 +95,40 @@ class ASTParser {
     }
 
     private fun parseOperatorExpression(tokenIterator: TokenIterator): ExpressionNode<*>? {
-        return parseArithmeticExpression(
-                tokenIterator
-        )?:parseLogicExpression(tokenIterator)
+        var result: ExpressionNode<*>?
+        val (arithmeticExpStartPos, arithmeticExp) = parseArithmeticExpression(tokenIterator)
+        result = arithmeticExp
+        if (result != null && tokenIterator.hasNext()) {
+            val nextToken = tokenIterator.next()
+            if (nextToken !is NewLine && nextToken !is Semicolon) {
+                result = null
+                tokenIterator.currentPos = arithmeticExpStartPos
+            }
+        }
+        if (result != null) return result
+        val (logicStartPos, logicExp) = parseLogicExpression(tokenIterator)
+        result = logicExp
+        if (result != null && tokenIterator.hasNext()) {
+            val nextToken = tokenIterator.next()
+            if (nextToken !is NewLine && nextToken !is Semicolon) {
+                result = null
+                tokenIterator.currentPos = logicStartPos
+            }
+        }
+        return result
     }
 
-    private fun parseLogicExpression(tokenIterator: TokenIterator): ExpressionNode<*>? {
+    private fun parseLogicExpression(tokenIterator: TokenIterator): Pair<Int, ExpressionNode<*>?> {
         return parseAndOrExpression(tokenIterator)
     }
 
-    private fun parseAndOrExpression(tokenIterator: TokenIterator) : ExpressionNode<*>? {
-        if (!tokenIterator.hasNext()) return null
+    private fun parseAndOrExpression(tokenIterator: TokenIterator) : Pair<Int, ExpressionNode<*>?> {
+        if (!tokenIterator.hasNext()) return tokenIterator.currentPos to null
         val startPos = tokenIterator.currentPos
         var result: ExpressionNode<*>? = null
         var leftExpression = parseCompareExpression(tokenIterator)?:run {
             tokenIterator.currentPos = startPos
-            return null
+            return tokenIterator.currentPos to null
         }
         result = leftExpression
         while (tokenIterator.hasNext()) {
@@ -129,22 +148,15 @@ class ASTParser {
                 break
             }
         }
-        return result?.let {
-            if (tokenIterator.hasNext()) {
-                val nextToken = tokenIterator.next()
-                if (nextToken !is Semicolon && nextToken !is NewLine) {
-                    tokenIterator.currentPos = startPos
-                    null
-                } else it
-            } else it
-        }
+        return startPos to result
     }
 
     private fun parseCompareExpression(tokenIterator: TokenIterator) : ExpressionNode<*>? {
         if (!tokenIterator.hasNext()) return null
         var result: ExpressionNode<*>? = null
         val startPos = tokenIterator.currentPos
-        var leftExpression = parseVariableOrBoolOrNotExpression(tokenIterator)?: run {
+        val (_, ariResult) = parseArithmeticExpression(tokenIterator)
+        var leftExpression = ariResult?:parseVariableOrBoolOrNotExpression(tokenIterator)?: run {
             tokenIterator.currentPos = startPos
             return null
         }
@@ -179,17 +191,17 @@ class ASTParser {
         return result
     }
 
-    private fun parseArithmeticExpression(tokenIterator: TokenIterator): ExpressionNode<*>? {
+    private fun parseArithmeticExpression(tokenIterator: TokenIterator): Pair<Int, ExpressionNode<*>?> {
         return parsePlusOrMinusExpression(tokenIterator)
     }
 
-    private fun parsePlusOrMinusExpression(tokenIterator: TokenIterator): ExpressionNode<*>? {
-        if (!tokenIterator.hasNext()) return null
+    private fun parsePlusOrMinusExpression(tokenIterator: TokenIterator): Pair<Int, ExpressionNode<*>?> {
+        if (!tokenIterator.hasNext()) return tokenIterator.currentPos to null
         val startPos = tokenIterator.currentPos
         var result: ExpressionNode<*>? = null
         var leftExpression = parseMultiOrDivOrModExpression(tokenIterator)?:run {
             tokenIterator.currentPos = startPos
-            return null
+            return tokenIterator.currentPos to null
         }
         result = leftExpression
         while (tokenIterator.hasNext()) {
@@ -209,15 +221,7 @@ class ASTParser {
                 break
             }
         }
-        return result?.let {
-            if (tokenIterator.hasNext()) {
-                val nextToken = tokenIterator.next()
-                if (nextToken !is Semicolon && nextToken !is NewLine) {
-                    tokenIterator.currentPos = startPos
-                    null
-                } else it
-            } else it
-        }
+        return startPos to result
     }
 
     private fun parseMultiOrDivOrModExpression(tokenIterator: TokenIterator): ExpressionNode<*>? {
@@ -267,7 +271,15 @@ class ASTParser {
                 })
             }
             is LeftParentheses -> {
-                parsePlusOrMinusExpression(tokenIterator)
+                val (startPos, result) = parsePlusOrMinusExpression(tokenIterator)
+                result?.let {
+                    if (!tokenIterator.hasNext()) return@let it
+                    val nNextToken = tokenIterator.next()
+                    if (nNextToken !is NewLine && nNextToken !is Semicolon) {
+                        tokenIterator.currentPos = startPos
+                        null
+                    } else it
+                }
             }
             else -> null
         }
@@ -298,7 +310,15 @@ class ASTParser {
                 UnaryOperatorNode(NotTag.toString(), VariableNode(nextToken.value))
             }
             is LeftParentheses -> {
-                parseAndOrExpression(tokenIterator)
+                val (startPos, result) = parsePlusOrMinusExpression(tokenIterator)
+                result?.let {
+                    if (!tokenIterator.hasNext()) return@let it
+                    val nNextToken = tokenIterator.next()
+                    if (nNextToken !is NewLine && nNextToken !is Semicolon) {
+                        tokenIterator.currentPos = startPos
+                        null
+                    } else it
+                }
             }
             else -> null
         }

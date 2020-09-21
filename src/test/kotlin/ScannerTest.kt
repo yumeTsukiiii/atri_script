@@ -11,7 +11,7 @@ class ScannerTest {
 //        val defineA = "var a = 10\n a + 3"
 //        println(interpreter.eval(defineA))
 //        println(interpreter.eval("a =      3"))
-        println(interpreter.eval("var a = true; var b = 3 ;a && b"))
+        println(interpreter.eval("var a = 3; var b = 1; a + b == 4; 1 + 3 * 4"))
     }
 
     @Test

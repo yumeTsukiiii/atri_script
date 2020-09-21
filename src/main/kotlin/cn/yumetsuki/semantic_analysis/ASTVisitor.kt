@@ -86,7 +86,7 @@ class DefaultASTVisitor(
     }
 
     override fun visitNumber(node: NumberNode): Number {
-        return node.value
+        return node.value.toDouble()
     }
 
     override fun visitVariableDefineAndAssignment(node: VariableDefineAndAssignmentNode): Pair<String, Any> {
